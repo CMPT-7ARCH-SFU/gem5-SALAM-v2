@@ -1,4 +1,4 @@
-# gem5-SALAM #
+# gem5-SALAM
 
 gem5-SALAM (System Architecture for LLVM-based Accelerator Modeling), is a novel system architecture designed to enable LLVM-based modeling and simulation of custom hardware accelerators.
 
@@ -18,12 +18,14 @@ sudo apt install build-essential git m4 scons zlib1g zlib1g-dev \
     python3-dev python-is-python3 libboost-all-dev pkg-config
 ```
 
-## LLVM/Clang Setup 
+## LLVM/Clang Setup
 
 For a quick start, one can simply run the following to install LLVM and Clang on Ubuntu 20.04.
+
 ```bash
 sudo apt install llvm-9 llvm-9-tools clang-9
 ```
+
 After installing these specific libraries, simply run the [update alternatives](https://github.com/TeCSAR-UNCC/gem5-SALAM/blob/main/docs/update-alternatives.sh) script in docs/.
 
 Alternatively, you can install the latest version of LLVM via your system package manager or build from source found at https://github.com/llvm/llvm-project.
@@ -38,7 +40,7 @@ git clone https://github.com/TeCSAR-UNCC/gem5-SALAM
 
 When building gem5-SALAM, there are multiple different binary types that can be created. Just like in gem5 the options are debug, opt, fast, prof, and perf. We recommend that users either use the opt or debug builds, as these are the build types we develop and test on.
 
-Below are the bash commands you would use to build the opt or debug binary. 
+Below are the bash commands you would use to build the opt or debug binary.
 
 ```bash
 scons build/ARM/gem5.opt -j`nproc`
@@ -57,7 +59,7 @@ To use gem5-SALAM you need to define the computation model of you accelerator in
 Below are some resources in the gem5-SALAM directory that can be used when getting started:
 
 - Examples for system-level configuration can be found in **configs/common/HWAcc.py**.
-- Accelerator benchmarks and examples can be found in the **benchmarks** directory. 
+- Accelerator benchmarks and examples can be found in the **benchmarks** directory.
 - The **benchmarks/common** directory contains basic drivers and syscalls for baremetal simulation.
 - **benchmarks/sys_validation** contains examples for configuring and using gem5-SALAM with different algorithms.
 
@@ -71,13 +73,13 @@ In order to use the system validation benchmarks, it is required to have the ARM
 sudo apt-get install gcc-arm-none-eabi
 ```
 
-**systemValidation.sh** requires an environment variable named **M5_PATH** to be set. You will want to point it to your gem5-SALAM path as shown below. 
+**systemValidation.sh** requires an environment variable named **M5_PATH** to be set. You will want to point it to your gem5-SALAM path as shown below.
 
 ```bash
 export M5_PATH=/path/to/gem5-SALAM
 ```
 
-Next, compile your desired example. 
+Next, compile your desired example.
 
 ```bash
 cd $M5_PATH/benchmarks/sys_validation/[benchmark]
@@ -90,7 +92,7 @@ Finally, you can run any of the benchmarks you have compiled by running the syst
 ./systemValidation.sh -b [benchmark]
 ```
 
-If you would like to see the gem5-SALAM command created by the shell file you would just need to inspect the **RUN_SCRIPT** variable in the shell file. 
+If you would like to see the gem5-SALAM command created by the shell file you would just need to inspect the **RUN_SCRIPT** variable in the shell file.
 
 # Resources
 
@@ -110,8 +112,89 @@ We have written a guide on how to create the GEMM system validation example. Thi
 
 The [SALAM Object Overview](https://github.com/TeCSAR-UNCC/gem5-SALAM/blob/master/docs/SALAM_Object_Overview.md) covers what various Sim Objects in gem5-SALAM are and their purpose.
 
-## Full-system OS Simulation ##
+## Full-system OS Simulation
 
 Please download the latest version of the Linux Kernel for ARM from the [gem5 ARM kernel page](http://gem5.org/ARM_Kernel).
 You will also need the [ARM disk images](http://www.gem5.org/dist/current/arm/) for full system simulation.
 Devices operate in the physical memory address space.
+
+## Functional Unit List
+
+- This is used for calculating area
+- When set to 0; SALAM will adjust to match max dynamic value i.e., what is the smallest circuit that can run kernel without sacrificing ILP
+- getLimit will set the max value, 
+- getAvailable will set the  
+
+| Function Unit | ID  |
+| ------------- | --- |
+| INTADDER      | 1   |
+| INTMULTI      | 2   |
+| INTSHIFTER    | 3   |
+| INTBITWISE    | 4   |
+| FPSPADDER     | 5   |
+| FPDPADDER     | 6   |
+| FPSPMULTI     | 7   |
+| FPSPDIVID     | 8   |
+| FPDPMULTI     | 9   |
+| FPDPDIVID     | 10  |
+| COMPARE       | 11  |
+| GETELEMENTPTR | 12  |
+| CONVERSION    | 13  |
+| OTHERINST     | 14  |
+| REGISTER      | 15  |
+| COUNTER       | 16  |
+| TRIG_SINE     | 17  |
+
+## Opcode List
+
+| Opcode   | Number | 
+| -------- | ------ | 
+| Add      | 13     |
+| Addrspac | 50     |
+| Alloca   | 31     |
+| AndInst  | 28     |
+| Ashr     | 27     |
+| Bitcast  | 49     |
+| Br       | 2      |
+| Call     | 56     |
+| Fadd     | 14     |
+| Fcmp     | 54     |
+| Fdiv     | 21     |
+| Fence    | 35     |
+| Fmul     | 18     |
+| Fpext    | 46     |
+| Fptosi   | 42     |
+| Fptoui   | 41     |
+| Fptrunc  | 45     |
+| Frem     | 24     |
+| Fsub     | 16     |
+| Gep      | 34     |
+| Icmp     | 53     |
+| Indirect | 4      |
+| Inttoptr | 48     |
+| Invoke   | 5      |
+| Landingp | 66     |
+| Load     | 32     |
+| Lshr     | 26     |
+| Mul      | 17     |
+| OrInst   | 29     |
+| Phi      | 55     |
+| Ptrtoint | 47     |
+| Resume   | 6      |
+| Ret      | 1      |
+| Sdiv     | 20     |
+| Select   | 57     |
+| Sext     | 40     |
+| Shl      | 25     |
+| Srem     | 23     |
+| Store    | 33     |
+| Sub      | 15     |
+| SwitchIn | 3      |
+| Trunc    | 38     |
+| Udiv     | 19     |
+| Uitofp   | 43     |
+| Unreacha | 7      |
+| Urem     | 22     |
+| Vaarg    | 60     |
+| XorInst  | 30     |
+| Zext     | 39     |

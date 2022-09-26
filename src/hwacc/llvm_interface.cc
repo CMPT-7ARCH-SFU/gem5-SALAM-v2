@@ -216,12 +216,6 @@ LLVMInterface::ActiveFunction::processQueues()
 
     if (owner->hw->hw_statistics->use_cycle_tracking()) {
         auto hwStart = std::chrono::high_resolution_clock::now();
-        for (auto fu : hw->functional_units->functional_unit_list) {
-            std::cout << fu->get_alias() << " - " << fu->get_in_use() << "\n";
-        }
-
-
-
         owner->hw->hw_statistics->updateHWStatsCycleEnd(owner->cycle);
         auto hwStop = std::chrono::high_resolution_clock::now();
         owner->addHWTime(hwStop-hwStart);
@@ -782,8 +776,10 @@ LLVMInterface::printResults() {
 
    //hw->hw_statistics->print();
 
-
-    double adder_area = (hw->opcodes->get_usage(13) + hw->opcodes->get_usage(20) + hw->opcodes->get_usage(15)) *  1.794430e+02;
+    double adder_area =
+        (hw->opcodes->get_usage(13)  +
+         hw->opcodes->get_usage(15)) *
+        1.794430e+02;
     double adder_reads = (totals_reads[13] + totals_reads[15]);
     double adder_writes = (totals_writes[13] + totals_writes[15]);
     double adder_power_static = adder_reads*2.380803e-03; 
@@ -815,9 +811,31 @@ LLVMInterface::printResults() {
     std::cout << "\nTotal Power Static: " << total_power_static << "\n";
     std::cout << "\nTotal Power Dynamic: " << total_power_dynamic << "\n";
 
+    std::cout<< "\nFunction Unit," << std::setw(25) << "Limit," << std::setw(8) << "Per-cycle Usage," << std::setw(8) << 
+    "Total"<< std::setw(8) << "\n"; 
+    for (auto &fu : hw->functional_units->functional_unit_list) {
+      auto name = fu->get_alias();
+      int usage = 0;
+      int total = 0;
+      if (name == "integer_adder")
+        usage = (hw->opcodes->get_usage(13) +
+                 hw->opcodes->get_usage(15));
+      else if (name == "integer_multiplier")
+      usage = (hw->opcodes->get_usage(17) + hw->opcodes->get_usage(19) +
+               hw->opcodes->get_usage(20));
+      else if (name == "bitwise")
+        usage = (hw->opcodes->get_usage(29) + hw->opcodes->get_usage(30) +
+                 hw->opcodes->get_usage(25) + hw->opcodes->get_usage(26) +
+                 hw->opcodes->get_usage(27) + hw->opcodes->get_usage(28));
+      else
+        usage = 0;
+
+
+      std::cout << fu->get_alias() << " - " << fu->get_limit() << std::setw(8) << usage << std::setw(8) << "\n";
+    }
+
     // if (DTRACE(Trace)) DPRINTF(Runtime, "Trace: %s \n", __PRETTY_FUNCTION__);
     Tick cycle_time = clock_period/1000;
-
     auto hwTimingMS = std::chrono::duration_cast<std::chrono::milliseconds>(hwTime);
     auto hwHours = std::chrono::duration_cast<std::chrono::hours>(hwTimingMS);
     hwTimingMS -= std::chrono::duration_cast<std::chrono::seconds>(hwHours);
