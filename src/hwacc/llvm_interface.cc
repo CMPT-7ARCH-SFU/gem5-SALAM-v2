@@ -811,8 +811,14 @@ LLVMInterface::printResults() {
     std::cout << "\nTotal Power Static: " << total_power_static << "\n";
     std::cout << "\nTotal Power Dynamic: " << total_power_dynamic << "\n";
 
-    std::cout<< "\nFunction Unit," << std::setw(25) << "Limit," << std::setw(8) << "Per-cycle Usage," << std::setw(8) << 
-    "Total"<< std::setw(8) << "\n"; 
+    std::cout << "\n Adder dynamic count: " << adder_writes << "\n";
+    std::cout << "\n Bitwise dynamic count: " << bitwise_writes << "\n";
+    std::cout << "\n Multiplier dynamic count: " << multiplier_writes << "\n";
+    std::cout << "\n Reg dynamic count: " << reg_writes << "\n";
+
+    std::cout << std::setw(20) << "Function Unit" << " - " << std::setw(8)
+              << "Lim.(0=inf)" << std::setw(8) << "Units/Cycle" << std::setw(8)
+              << "Total Usage" << "\n";
     for (auto &fu : hw->functional_units->functional_unit_list) {
       auto name = fu->get_alias();
       int usage = 0;
@@ -830,9 +836,16 @@ LLVMInterface::printResults() {
       else
         usage = 0;
 
-
-      std::cout << fu->get_alias() << " - " << fu->get_limit() << std::setw(8) << usage << std::setw(8) << "\n";
+      std::cout << std::setw(20) << fu->get_alias() << " - " << std::setw(8)
+                << fu->get_limit() << std::setw(8) << usage << std::setw(8)
+                << "\n";
     }
+
+
+
+
+
+
 
     // if (DTRACE(Trace)) DPRINTF(Runtime, "Trace: %s \n", __PRETTY_FUNCTION__);
     Tick cycle_time = clock_period/1000;

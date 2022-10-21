@@ -123,7 +123,7 @@ Devices operate in the physical memory address space.
 - This is used for calculating area
 - When set to 0; SALAM will adjust to match max dynamic value i.e., what is the smallest circuit that can run kernel without sacrificing ILP
 - getLimit will set the max value, 
-- getAvailable will set the  
+- getAvailable varies as functional units are used 
 
 | Function Unit | ID  |
 | ------------- | --- |
@@ -146,6 +146,10 @@ Devices operate in the physical memory address space.
 | TRIG_SINE     | 17  |
 
 ## Opcode List
+
+This is used for tracking activity factors and 
+- When function unit limit is set to 0, getUsage will let us know what is min required to ensure performance is not affected.
+- Multiple opcodes could/will map to common function unit. It depends on the config.yml assignment. e.g., 13 (add), 15 (sub) map to the integer adder unit. ops like gep (34) map to a default unit id 0 and do not count towards area calculation as they are a software artifact. In hardware they will map to wires or control.
 
 | Opcode   | Number | 
 | -------- | ------ | 
