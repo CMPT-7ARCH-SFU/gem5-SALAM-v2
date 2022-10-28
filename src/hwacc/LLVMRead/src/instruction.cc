@@ -144,12 +144,12 @@ SALAM::Instruction::ready()
     return false;
 }
 
-bool
+SALAM::INST_STATUS 
 SALAM::Instruction::launch()
 {
     if (hasFunctionalUnit()) {
         if(!hw_interface->availableFunctionalUnit(getFunctionalUnit())) {
-            return false;
+            return SALAM::INST_STATUS::INST_RES_STALL;
             std::cout << "Waiting on next available FU\n"; 
         } else {
             
@@ -160,14 +160,24 @@ SALAM::Instruction::launch()
         if (dbg) DPRINTFS(Runtime, owner, "||  0 Cycle Instruction\n");
         compute();
         commit();
+        if (dbg)
+          DPRINTFS(Runtime, owner, "||==Return: %s\n",
+                   isCommitted() ? "true" : "false");
+        if (dbg)
+          DPRINTFS(Runtime, owner, "||==launch================\n");
+        return SALAM::INST_STATUS::INST_COMMITTED;
+
     } else {
-        currentCycle++;
-        compute();
+      if (dbg)
+        DPRINTFS(Runtime, owner, "||==Return: %s\n",
+                 isCommitted() ? "true" : "false");
+      if (dbg)
+        DPRINTFS(Runtime, owner, "||==launch================\n");
+      currentCycle++;
+      compute();
+      return SALAM::INST_STATUS::INST_MULTI_CYCLE;
     }
-    if (dbg) DPRINTFS(Runtime, owner, "||==Return: %s\n", isCommitted() ? "true" : "false");
-    if (dbg) DPRINTFS(Runtime, owner, "||==launch================\n");
-    return isCommitted();
-}
+ }
 
 bool
 SALAM::Instruction::commit()

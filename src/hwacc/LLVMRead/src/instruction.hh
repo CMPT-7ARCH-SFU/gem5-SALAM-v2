@@ -15,6 +15,13 @@
 
 namespace SALAM {
 
+
+enum INST_STATUS {
+    INST_RES_STALL,
+    INST_MULTI_CYCLE,
+    INST_COMMITTED
+};
+
 class BasicBlock; // Required Declaration
 
 //---------------------------------------------------------------------------//
@@ -31,7 +38,6 @@ class Instruction : public Value
         uint64_t cycleCount;
         uint64_t currentCycle;
         uint64_t functional_unit = 0;
-        HWInterface* hw_interface;
 
     protected:
         valueListTy staticDependencies;
@@ -51,12 +57,18 @@ class Instruction : public Value
         bool committed = false;
         bool isready = false;
     public:
-        Instruction(uint64_t id, gem5::SimObject * owner, bool dbg); //
-        Instruction(uint64_t id, gem5::SimObject * owner, bool dbg, uint64_t OpCode); //
-        Instruction(uint64_t id, gem5::SimObject * owner, bool dbg, uint64_t OpCode, uint64_t cycles); //
-        Instruction(uint64_t id, gem5::SimObject * owner, bool dbg, uint64_t OpCode, uint64_t cycles, uint64_t functional_unit); //
-        ~Instruction(); //
-        bool operator == (const std::shared_ptr<SALAM::Instruction> inst) const { return this->getUID() == inst->getUID(); }
+      HWInterface *hw_interface;
+      Instruction(uint64_t id, gem5::SimObject *owner, bool dbg); //
+      Instruction(uint64_t id, gem5::SimObject *owner, bool dbg,
+                  uint64_t OpCode); //
+      Instruction(uint64_t id, gem5::SimObject *owner, bool dbg,
+                  uint64_t OpCode, uint64_t cycles); //
+      Instruction(uint64_t id, gem5::SimObject *owner, bool dbg,
+                  uint64_t OpCode, uint64_t cycles,
+                  uint64_t functional_unit); //
+      ~Instruction();                        //
+      bool operator==(const std::shared_ptr<SALAM::Instruction> inst) const {
+        return this->getUID() == inst->getUID(); }
         bool operator != (const std::shared_ptr<SALAM::Instruction> inst) const { return !operator==(inst); }
         virtual void initialize(llvm::Value * irval, irvmap * irmap, SALAM::valueListTy * valueList); //
         virtual std::shared_ptr<SALAM::BasicBlock> getTarget()  { return nullptr; }
@@ -76,8 +88,8 @@ class Instruction : public Value
         void addRuntimeUser(std::shared_ptr<SALAM::Instruction> dep) { dynamicUsers.push_back(dep); }
         void signalUsers();
         bool isCommitted() { return committed; }
-        //bool hasFunctionalUnit() { return (functional_unit != 0); }
-        bool hasFunctionalUnit() { return false; }
+        bool hasFunctionalUnit() { return (functional_unit != 0); }
+        //bool hasFunctionalUnit() { return false; }
         bool debug() { return dbg; }
         void linkOperands(const SALAM::Operand &newOp);
         std::vector<SALAM::Operand> * getOperands() { return &operands; }
@@ -90,7 +102,7 @@ class Instruction : public Value
         virtual bool isLoad() { return false; }
         virtual bool isStore() {return false; }
         virtual bool isGEP() { return false; }
-        virtual bool launch();
+        virtual SALAM::INST_STATUS launch();
         virtual bool commit();
         virtual bool ready();
         virtual void compute() { }

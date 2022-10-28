@@ -8,11 +8,14 @@ HWInterface::HWInterface(const HWInterfaceParams &params) :
     inst_config(params.inst_config),
     opcodes(params.opcodes),
     salam_power_model(params.salam_power_model),
-    simulator_config(params.simulator_config) { }
+    simulator_config(params.simulator_config) {    
+    }
 
 bool 
 HWInterface::availableFunctionalUnit(uint64_t functional_unit) {
     //std::cout << "\n\n\nTest 1 - " <<  functional_unit << "\n\n\n";
+    //std::cout << "adder" << functional_units->functional_unit_list[7]->get_limit();
+
     switch(functional_unit) {
         case INTADDER : {
             if (functional_units->_integer_adder->is_available()) {

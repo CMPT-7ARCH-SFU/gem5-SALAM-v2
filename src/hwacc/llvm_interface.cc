@@ -193,17 +193,48 @@ LLVMInterface::ActiveFunction::processQueues()
                             ++queue_iter;
                         }
                     } else {
-                        auto computeStart = std::chrono::high_resolution_clock::now();
-                        if (!(inst)->launch()) {
-                            if (dbg) DPRINTFS(Runtime, owner,  "\t\t  | Added to Compute Queue: %s - UID[%i]\n", llvm::Instruction::getOpcodeName((inst)->getOpode()), (inst)->getUID());
-                            computeQueue.insert({(inst)->getUID(), inst});
-                            hw_cycle_stats.compLaunched++;
-                        }
-                        auto computeStop = std::chrono::high_resolution_clock::now();
-                        owner->addComputeTime(computeStop-computeStart);
-                        if (dbg) DPRINTFS(Runtime, owner,  "\t\t  |-Erase From Queue: %s - UID[%i]\n", llvm::Instruction::getOpcodeName((*queue_iter)->getOpode()), (*queue_iter)->getUID());
+
+                      auto computeStart =
+                          std::chrono::high_resolution_clock::now();
+                      SALAM::INST_STATUS status = (inst)->launch();
+                      if (status == SALAM::INST_STATUS::INST_MULTI_CYCLE) {
+                        if (dbg)
+                          DPRINTFS(
+                              Runtime, owner,
+                              "\t\t  | Added to Compute Queue: %s - UID[%i]\n",
+                              llvm::Instruction::getOpcodeName(
+                                  (inst)->getOpode()),
+                              (inst)->getUID());
+                        computeQueue.insert({(inst)->getUID(), inst});
+                        hw_cycle_stats.compLaunched++;
+                        auto computeStop =
+                            std::chrono::high_resolution_clock::now();
+                        owner->addComputeTime(computeStop - computeStart);
+                        if (dbg)
+                          DPRINTFS(Runtime, owner,
+                                   "\t\t  |-Erase From Queue: %s - UID[%i]\n",
+                                   llvm::Instruction::getOpcodeName(
+                                       (*queue_iter)->getOpode()),
+                                   (*queue_iter)->getUID());
                         queue_iter = reservation.erase(queue_iter);
                         hw_cycle_stats.compActive++;
+                      } else if (status == SALAM::INST_STATUS::INST_COMMITTED) {
+                        auto computeStop =
+                            std::chrono::high_resolution_clock::now();
+                        owner->addComputeTime(computeStop - computeStart);
+                        if (dbg)
+                          DPRINTFS(Runtime, owner,
+                                   "\t\t  |-Erase From Queue: %s - UID[%i]\n",
+                                   llvm::Instruction::getOpcodeName(
+                                       (*queue_iter)->getOpode()),
+                                   (*queue_iter)->getUID());
+                        else {
+                        }
+                        queue_iter = reservation.erase(queue_iter);
+                        hw_cycle_stats.compActive++;
+                      } else if (status == SALAM::INST_STATUS::INST_RES_STALL) {
+                        queue_iter++;
+                      }
                     }
                 } else {
                     ++queue_iter;
@@ -489,6 +520,7 @@ LLVMInterface::constructStaticGraph() {
             for (auto inst_iter = bb.begin(); inst_iter != bb.end(); inst_iter++) {
                 llvm::Instruction &inst = *inst_iter;
                 std::shared_ptr<SALAM::Instruction> sinst = createInstruction(&inst, valueID);
+                sinst->hw_interface = hw;
                 values.push_back(sinst);
                 vmap.insert(SALAM::irvmaptype(&inst, sinst));
                 valueID++;

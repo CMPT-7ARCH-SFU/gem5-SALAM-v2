@@ -124,7 +124,7 @@ class FunctionalUnitBase
 		double get_leakage_power() { return _leakage_power; }
 		double get_area() { return _area; }
 		double get_path_delay() { return _path_delay; }
-		bool is_available() { return (_in_use >= _available); }
+		bool is_available() { if (_limit == 0) return true; return (_in_use < _limit); }
 		void use_functional_unit() { _in_use++; }
 		void clear_functional_unit() { _in_use--; }
 		void set_functional_unit_limit(uint64_t available) { _available = available; }
