@@ -861,10 +861,11 @@ LLVMInterface::printResults() {
       else if (name == "integer_multiplier")
       usage = (hw->opcodes->get_usage(17) + hw->opcodes->get_usage(19) +
                hw->opcodes->get_usage(20));
-      else if (name == "bitwise")
-        usage = (hw->opcodes->get_usage(29) + hw->opcodes->get_usage(30) +
-                 hw->opcodes->get_usage(25) + hw->opcodes->get_usage(26) +
-                 hw->opcodes->get_usage(27) + hw->opcodes->get_usage(28));
+      else if (name == "bitwise_operations")
+        usage = bitwise_writes;
+        //(hw->opcodes->get_usage(29) + hw->opcodes->get_usage(30) +
+        //         hw->opcodes->get_usage(25) + hw->opcodes->get_usage(26) +
+         //        hw->opcodes->get_usage(27) + hw->opcodes->get_usage(28));
       else
         usage = 0;
 
