@@ -76,11 +76,13 @@ LLVMInterface::ActiveFunction::processQueues()
         hw_cycle_stats.storeInFlight = writeQueue.size();
         hw_cycle_stats.compInFlight = computeQueue.size();
         
-        
         //
         auto hwStop = std::chrono::high_resolution_clock::now();
         owner->addHWTime(hwStop-hwStart);
     }
+
+    if ((readQueue.size() != 0) && computeQueue.size() == 0)
+      owner->stalls++;
 
     if (dbg) {
         DPRINTFS(Runtime, owner, "\t\t  |-[Process Queues]--------\n");
